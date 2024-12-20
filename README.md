@@ -17,7 +17,7 @@ It supports:
 - Images (EXIF metadata and OCR)
 - Audio (EXIF metadata and speech transcription)
 - HTML
-- Text-based formats (CSV, JSON, XML)
+- Text-based formats (CSV, JSON, XML, YAML)
 - ZIP files (iterates over contents)
 
 To install MarkItDown, use pip: `pip install markitdown`. Alternatively, you can install it from the source: `pip install -e .`
@@ -85,7 +85,7 @@ from openai import OpenAI
 import os
 client = OpenAI(api_key="your-api-key-here")
 md = MarkItDown(llm_client=client, llm_model="gpt-4o-2024-11-20")
-supported_extensions = ('.pptx', '.docx', '.pdf', '.jpg', '.jpeg', '.png')
+supported_extensions = ('.pptx', '.docx', '.pdf', '.jpg', '.jpeg', '.png', '.yaml', '.yml')
 files_to_convert = [f for f in os.listdir('.') if f.lower().endswith(supported_extensions)]
 for file in files_to_convert:
     print(f"\nConverting {file}...")

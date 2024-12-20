@@ -25,6 +25,7 @@ import pandas as pd
 import pdfminer
 import pdfminer.high_level
 import pptx
+import yaml  # P8c4f
 
 # File-format detection
 import puremagic
@@ -1205,6 +1206,55 @@ class ZipConverter(DocumentConverter):
             )
 
 
+class YamlConverter(DocumentConverter):  # P8c4f
+    """Converts YAML files to Markdown."""
+
+    def convert(self, local_path: str, **kwargs: Any) -> Union[None, DocumentConverterResult]:
+        # Bail if not a YAML
+        extension = kwargs.get("file_extension", "")
+        if extension.lower() not in [".yaml", ".yml"]:
+            return None
+
+        # Parse and convert the YAML file
+        result = None
+        with open(local_path, "rt", encoding="utf-8") as fh:
+            yaml_content = yaml.safe_load(fh)
+            result = self._convert(yaml_content)
+
+        return result
+
+    def _convert(self, yaml_content: dict) -> Union[None, DocumentConverterResult]:
+        """Helper function that converts YAML content to Markdown."""
+        try:
+            md_output = []
+
+            def yaml_to_md(yaml_obj, indent=0):
+                if isinstance(yaml_obj, dict):
+                    for key, value in yaml_obj.items():
+                        md_output.append(f"{'  ' * indent}- **{key}**:")
+                        yaml_to_md(value, indent + 1)
+                elif isinstance(yaml_obj, list):
+                    for item in yaml_obj:
+                        md_output.append(f"{'  ' * indent}-")
+                        yaml_to_md(item, indent + 1)
+                else:
+                    md_output.append(f"{'  ' * indent}- {yaml_obj}")
+
+            yaml_to_md(yaml_content)
+
+            md_text = "\n".join(md_output)
+
+            return DocumentConverterResult(
+                title=None,
+                text_content=md_text,
+            )
+
+        except Exception as e:
+            raise FileConversionException(
+                f"Error converting YAML file: {str(e)}"
+            ) from e
+
+
 class FileConversionException(BaseException):
     pass
 
@@ -1285,6 +1335,7 @@ class MarkItDown:
         self.register_page_converter(IpynbConverter())
         self.register_page_converter(PdfConverter())
         self.register_page_converter(ZipConverter())
+        self.register_page_converter(YamlConverter())  # P2f0a
 
     def convert(
         self, source: Union[str, requests.Response, Path], **kwargs: Any
