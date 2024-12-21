@@ -130,6 +130,16 @@ LLM_TEST_STRINGS = [
     "5bda1dd6",
 ]
 
+YAML_TEST_STRINGS = [
+    "- name: John Doe",
+    "- age: 30",
+    "- address:",
+    "  - street: 123 Main St",
+    "  - city: Anytown",
+    "  - state: CA",
+    "  - zip: 12345",
+]
+
 
 # --- Helper Functions ---
 def validate_strings(result, expected_strings, exclude_strings=None):
@@ -231,6 +241,12 @@ def test_markitdown_local() -> None:
     ## Test non-UTF-8 encoding
     result = markitdown.convert(os.path.join(TEST_FILES_DIR, "test_mskanji.csv"))
     validate_strings(result, CSV_CP932_TEST_STRINGS)
+
+    # Test YAML processing
+    result = markitdown.convert(os.path.join(TEST_FILES_DIR, "test.yaml"))
+    text_content = result.text_content.replace("\\", "")
+    for test_string in YAML_TEST_STRINGS:
+        assert test_string in text_content
 
 
 @pytest.mark.skipif(
